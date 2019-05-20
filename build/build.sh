@@ -8,6 +8,9 @@ if ! [ -x "$(command -v llvm-config)"  ]; then
     export LD_LIBRARY_PATH=${HOME}/clang+llvm/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 fi
 
+#Replace output directory in case we use sync_afl option
+sed -i "s/\"angora\"/\"$(hostname)-angora\"/" defs.rs
+
 cargo build
 cargo build --release
 
