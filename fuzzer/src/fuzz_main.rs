@@ -116,10 +116,10 @@ fn initialize_directories(in_dir: &str, out_dir: &str, sync_afl: bool) -> PathBu
         PathBuf::from(out_dir)
     };
 
-    let restart = in_dir == "-";
-    if !restart {
-        fs::create_dir(&angora_out_dir).expect("Output directory has existed!");
-    }
+    //let restart = in_dir == "-";
+    //if !restart {
+    //    fs::create_dir(&angora_out_dir).expect("Output directory has existed!");
+    //}
 
     angora_out_dir
 }
