@@ -30,9 +30,10 @@ pub fn fuzz_main(
     sync_afl: bool,
     enable_afl: bool,
     enable_exploitation: bool,
+    hostname: &str,
 ) {
     pretty_env_logger::init();
-
+    unsafe{defs::ANGORA_DIR_NAME = &hostname};
     let angora_out_dir = initialize_directories(in_dir, out_dir, sync_afl);
     let command_option = command::CommandOpt::new(
         mode,
@@ -115,7 +116,6 @@ fn initialize_directories(in_dir: &str, out_dir: &str, sync_afl: bool) -> PathBu
     } else {
         PathBuf::from(out_dir)
     };
-
     let restart = in_dir == "-";
     if !restart {
         fs::create_dir(&angora_out_dir).expect("Output directory has existed!");
@@ -130,7 +130,7 @@ fn gen_path_afl(out_dir: &str) -> PathBuf {
     if create_dir_result.is_err() {
         warn!("dir has existed. {:?}", base_path);
     }
-    base_path.join(defs::ANGORA_DIR_NAME)
+    base_path.join(unsafe{defs::ANGORA_DIR_NAME})
 }
 
 fn set_sigint_handler(r: Arc<AtomicBool>) {
