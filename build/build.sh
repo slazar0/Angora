@@ -9,7 +9,7 @@ if ! [ -x "$(command -v llvm-config)"  ]; then
 fi
 
 #Replace output directory in case we use sync_afl option
-sed -i "s/\"angora\"/\"$(hostname)-angora\"/" defs.rs
+sed -i "s/\"angora\"/\"$(hostname)-angora\"/" $ANGORA_PATH/common/src/defs.rs
 
 cargo build
 cargo build --release
