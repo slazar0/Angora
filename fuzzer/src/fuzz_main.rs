@@ -33,12 +33,12 @@ pub fn fuzz_main(
     hostname: &str,
 ) {
     pretty_env_logger::init();
-    //unsafe{defs::ANGORA_DIR_NAME = &hostname};
+    let mut tmp_out_dir = out_dir.to_string();
     if !out_dir.ends_with("/") {
-        out_dir = out_dir + "/";
+        tmp_out_dir = [out_dir, "/"].concat().to_string();
     }
-    out_dir = out_dir + hostname + "-" + defs::ANGORA_DIR_NAME;
-    let angora_out_dir = initialize_directories(in_dir, out_dir, sync_afl);
+    let final_out_dir = &[tmp_out_dir, hostname.to_string(), "-angora".to_string()].concat();
+    let angora_out_dir = initialize_directories(in_dir, final_out_dir, sync_afl);
     let command_option = command::CommandOpt::new(
         mode,
         track_target,
@@ -100,6 +100,7 @@ pub fn fuzz_main(
         &global_branches,
         &stats,
         child_count,
+        final_out_dir,
     );
 
     for handle in handles {
@@ -121,7 +122,7 @@ fn initialize_directories(in_dir: &str, out_dir: &str, sync_afl: bool) -> PathBu
         PathBuf::from(out_dir)
     };
     let restart = in_dir == "-";
-    if !restart {
+    if !restart && !sync_afl{
         fs::create_dir(&angora_out_dir).expect("Output directory has existed!");
     }
 
@@ -129,6 +130,7 @@ fn initialize_directories(in_dir: &str, out_dir: &str, sync_afl: bool) -> PathBu
 }
 
 fn gen_path_afl(out_dir: &str) -> PathBuf {
+    println!("GEN_PATH_AFL: {}", out_dir);
     let base_path = PathBuf::from(out_dir);
     let create_dir_result = fs::create_dir(&base_path);
     if create_dir_result.is_err() {
@@ -209,12 +211,13 @@ fn main_thread_sync_and_log(
     global_branches: &Arc<branches::GlobalBranches>,
     stats: &Arc<RwLock<stats::ChartStats>>,
     child_count: Arc<AtomicUsize>,
+    working_dir: &str,
 ) {
     let mut last_explore_num = stats.read().unwrap().get_explore_num();
     let sync_dir = Path::new(out_dir);
     let mut synced_ids = HashMap::new();
     if sync_afl {
-        depot::sync_afl(executor, running.clone(), sync_dir, &mut synced_ids);
+        depot::sync_afl(executor, running.clone(), sync_dir, &mut synced_ids, working_dir);
     }
     let mut sync_counter = 1;
     show_stats(&mut log_file, depot, global_branches, stats);
@@ -222,7 +225,7 @@ fn main_thread_sync_and_log(
         thread::sleep(time::Duration::from_secs(5));
         sync_counter -= 1;
         if sync_afl && sync_counter <= 0 {
-            depot::sync_afl(executor, running.clone(), sync_dir, &mut synced_ids);
+            depot::sync_afl(executor, running.clone(), sync_dir, &mut synced_ids, working_dir);
             sync_counter = 12;
         }
 
