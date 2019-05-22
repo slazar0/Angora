@@ -33,7 +33,11 @@ pub fn fuzz_main(
     hostname: &str,
 ) {
     pretty_env_logger::init();
-    unsafe{defs::ANGORA_DIR_NAME = &hostname};
+    //unsafe{defs::ANGORA_DIR_NAME = &hostname};
+    if !out_dir.ends_with("/") {
+        out_dir = out_dir + "/";
+    }
+    out_dir = out_dir + hostname + "-" + defs::ANGORA_DIR_NAME;
     let angora_out_dir = initialize_directories(in_dir, out_dir, sync_afl);
     let command_option = command::CommandOpt::new(
         mode,
@@ -130,7 +134,8 @@ fn gen_path_afl(out_dir: &str) -> PathBuf {
     if create_dir_result.is_err() {
         warn!("dir has existed. {:?}", base_path);
     }
-    base_path.join(unsafe{defs::ANGORA_DIR_NAME})
+    //base_path.join(unsafe{defs::ANGORA_DIR_NAME})
+    base_path
 }
 
 fn set_sigint_handler(r: Arc<AtomicBool>) {
