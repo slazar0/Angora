@@ -52,7 +52,9 @@ pub fn sync_afl(
                 if entry_path.is_dir() {
                     let file_name = entry.file_name().into_string();
                     if let Ok(name) = file_name {
-                        if name != working_dir && !name.starts_with(".") {
+                        if !working_dir.contains(&name) && !name.starts_with(".") {
+                            info!("sync_dir_value: {}", sync_dir_value);
+                            info!("AFL directory found: {}", name);
                             let path = entry_path.join("queue");
                             if path.is_dir() {
                                 sync_one_afl_dir(executor, running.clone(), &path, &name, sync_ids);

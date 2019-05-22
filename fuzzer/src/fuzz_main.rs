@@ -136,7 +136,7 @@ fn gen_path_afl(out_dir: &str) -> PathBuf {
     if create_dir_result.is_err() {
         warn!("dir has existed. {:?}", base_path);
     }
-    //base_path.join(unsafe{defs::ANGORA_DIR_NAME})
+
     base_path
 }
 
